@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+models/*.joblib
+live_capture/
