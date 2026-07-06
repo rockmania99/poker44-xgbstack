@@ -17,8 +17,14 @@ import sys, os, glob, gzip, json, time, warnings, numpy as np, joblib
 sys.path.insert(0, "."); warnings.filterwarnings("ignore")
 import training.build_dataset as bd
 from poker44_ml.features import chunk_features as base_cf
-from poker44_bump.model_v23 import V23Model
-from poker44_bump.model_v29 import WeightedMeanEnsemble
+try:
+    from poker44_bump.model_v23 import V23Model
+except ImportError:  # vendored only where the served artifact needs it
+    V23Model = None
+try:
+    from poker44_bump.model_v29 import WeightedMeanEnsemble
+except ImportError:
+    WeightedMeanEnsemble = None
 from sklearn.metrics import average_precision_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import (ExtraTreesClassifier, RandomForestClassifier,
