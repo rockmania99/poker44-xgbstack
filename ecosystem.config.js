@@ -9,7 +9,7 @@ module.exports = { apps: [{
         "--subtensor.network finney --axon.port 8096 " +
         "--blacklist.force_validator_permit --logging.info",
   env: {
-    POKER44_BUMP_MODEL: "/root/poker44-e1/models/model_v29a.joblib",
+    POKER44_BUMP_MODEL: "/root/poker44-e1/models/model_v32u2.joblib",
     BT_NO_PARSE_CLI_ARGS: "0",
     POKER44_HEAD: "raw",
   },

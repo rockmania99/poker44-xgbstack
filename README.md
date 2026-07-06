@@ -1,11 +1,16 @@
 # poker44-xgbstack
 
-Poker44 (Bittensor netuid 126) bot-detection miner — model line **v29a**.
+Poker44 (Bittensor netuid 126) bot-detection miner — model line **v32u2** (previously v29a).
 
 ## Model
-5 XGBoost/HistGB-family tree learners (2x XGBoost + HistGradientBoosting + deep ExtraTrees + RandomForest, seed family 311) -> grouped 5-fold-OOF logistic meta-combiner, followed by a **raw-probability serving head** (rank-faithful; no fixed
-positive fraction — scoring is rank-only and evaluation windows vary in
-composition). No neural sequence model, no isotonic calibration.
+Union of two 6-learner tree stacks served as one 12-member ensemble:
+(a) a LightGBM/XGBoost/HistGB/ExtraTrees stack trained with human x20 and
+recent-date x6 sample weighting, and (b) an unweighted 3-family stack combined
+by grouped 5-fold OOF-AP weights. Each stack keeps its OOF-AP member weights
+(halved), and the ensemble serves the **raw weighted-mean probability**
+(rank-faithful; no fixed positive fraction — scoring is rank-only and
+evaluation windows vary in composition). No neural sequence model, no isotonic
+calibration.
 
 ## Training data (released/public only)
 - Public benchmark releases (api.poker44.net `/api/v1/benchmark/chunks`, all
