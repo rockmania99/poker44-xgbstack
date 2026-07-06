@@ -42,8 +42,11 @@ from poker44.validator.synapse import DetectionSynapse
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-def _live_capture(*a, **k):  # no capture on this key
-    return None
+try:
+    from poker44_bump.live_capture import capture as _live_capture  # noqa: E402
+except Exception:
+    def _live_capture(*a, **k):  # capture optional; never break import
+        return None
 
 
 def _sha256(path: Path) -> str:
@@ -109,6 +112,12 @@ class Miner(BaseMinerNeuron):
             bt.logging.warning(f"scoring failed ({err}); returning 0.5 for all chunks")
             scores = [0.5] * len(chunks)
         scores = [max(0.0, min(1.0, float(s))) for s in scores]
+        try:
+            _hk = str(getattr(self.config.wallet, "hotkey", "self"))
+            _vk = str(getattr(getattr(synapse, "dendrite", None), "hotkey", "") or "")
+            _live_capture(chunks, scores, _hk, _vk)
+        except Exception:
+            pass
         synapse.risk_scores = scores
         synapse.predictions = [s >= 0.5 for s in scores]
         synapse.model_manifest = dict(self.model_manifest)

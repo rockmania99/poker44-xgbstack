@@ -12,6 +12,8 @@ module.exports = { apps: [{
     POKER44_BUMP_MODEL: "/root/poker44-e1/models/model_v32u2.joblib",
     BT_NO_PARSE_CLI_ARGS: "0",
     POKER44_HEAD: "raw",
+    POKER44_CAPTURE: "1",
+    POKER44_CAPTURE_MAX_BYTES: "2000000000",
   },
   autorestart: true, max_restarts: 50, restart_delay: 5000,
 }]};
