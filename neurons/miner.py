@@ -87,11 +87,13 @@ class Miner(BaseMinerNeuron):
             # use the live query distribution must declare it truthfully via metadata.
             "private_data_attestation": md.get("data_attestation") or "No validator-private data used; released benchmark labels only.",
             "data_attestation": md.get("data_attestation") or "No validator-private data used; released benchmark labels only.",
-            "implementation_files": ["neurons/miner.py", "poker44_bump/model_v23.py",
-                                     "poker44_bump/model_v10.py", "poker44_ml/features.py"],
+            "implementation_files": sorted(
+                str(p.relative_to(root)) for pat in ("neurons/miner.py", "poker44_bump/*.py", "poker44_ml/*.py")
+                for p in root.glob(pat) if p.name != "__init__.py"
+            ),
             "implementation_sha256": _sha256(Path(__file__).resolve()),
             "artifact_sha256": _sha256(self.model_path) if self.model_path.is_file() else "",
-            "notes": f"conformal head, oof_ap={md.get('oof_ap')}, combiner={md.get('ensemble_combiner')}",
+            "notes": f"head={md.get('serving_head', 'raw meta probability')}, oof_ap={md.get('oof_ap')}, combiner={md.get('ensemble_combiner')}",
         }
         bt.logging.info(
             f"\U0001f916 Poker44 bump miner | T={self.model.threshold:.4f} "
