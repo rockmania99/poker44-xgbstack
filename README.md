@@ -1,33 +1,30 @@
-# poker44-xgbstack
+# poker44-behavioral-trees-a
 
-Poker44 (Bittensor netuid 126) bot-detection miner — model line **v32u2** (previously v29a).
+Miner implementation for Poker44 (Bittensor netuid 126) — chunk-level poker-bot
+detection from behavioral hand statistics.
 
-## Model
-Union of two 6-learner tree stacks served as one 12-member ensemble:
-(a) a LightGBM/XGBoost/HistGB/ExtraTrees stack trained with human x20 and
-recent-date x6 sample weighting, and (b) an unweighted 3-family stack combined
-by grouped 5-fold OOF-AP weights. Each stack keeps its OOF-AP member weights
-(halved), and the ensemble serves the **raw weighted-mean probability**
-(rank-faithful; no fixed positive fraction — scoring is rank-only and
-evaluation windows vary in composition). No neural sequence model, no isotonic
-calibration.
+**Served model:** `v2.0-C7b-hoard47` — LightGBM + HistGradientBoosting + ExtraTrees
+probability blend over ~139 behavioral features per chunk (action entropy,
+bet-size quantization, self-similarity, n-gram statistics, street rigidity,
+pot/bet dynamics). Scores are served through a batch-relative rank head
+(`neurons/eros01_miner.py`), which preserves ranking while guaranteeing
+threshold-sanity behavior on live traffic. Weights are this key's own training
+run (seed 42).
 
-## Training data (released/public only)
-- Public benchmark releases (api.poker44.net `/api/v1/benchmark/chunks`, all
-  sourceDates 2026-05-26 … 2026-07-06 **including the v2.2 expanded release**,
-  groundTruth labels), with within-group subset augmentation and
-  per-date-per-label pooled 80–105-hand chunks for live-size coverage.
-- The canonical subnet repo's released human hands corpus
-  (`hands_generator/human_hands/poker_hands_combined.json.gz`, 32k real human
-  hands), chunked into session blocks at both size ranges.
-- All hands sanitized via `prepare_hand_for_miner` (train == serve view).
-- **No validator-private data.**
+**Training data:** released public training benchmark
+(api.poker44.net/api/v1/benchmark, archived source dates) plus the public human
+hand corpus shipped in the subnet repo, projected through the subnet's
+`prepare_hand_for_miner`. Feature selection additionally used unsupervised
+distribution statistics (no labels) from validator queries received by this
+operator's own keys. No validator-private evaluation data, labels, or ground
+truth were used. Trained artifacts and datasets are not distributed here.
 
-Trained weights are withheld (`models/` gitignored), reproducible via
-`train_model.py` (VER=a) on the public data above.
+## Layout
+- `neurons/eros01_miner.py` — the served neuron (manifest `implementation_files`)
+- `miner_model/` — feature extraction, model class, inference, trainers
+- Requires the Poker44 subnet package (`pip install -e .` from Poker44/Poker44-subnet)
 
-## Serve
+## Run
 ```
-pm2 start ecosystem.config.js
+python neurons/eros01_miner.py --netuid 126 --wallet.name <cold> --wallet.hotkey <hot> --axon.port 8091
 ```
-Env: `POKER44_BUMP_MODEL=<repo>/models/model_v29a.joblib`, `POKER44_HEAD=raw`.
